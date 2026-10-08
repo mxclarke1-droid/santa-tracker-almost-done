@@ -1,0 +1,170 @@
+```js
+/* =========================================================
+   SANTA ARRIVAL PINS
+   Pins do NOT appear until Santa reaches the location.
+   No boxes. No floating labels.
+========================================================= */
+
+const arrivalPinGroup =
+    new THREE.Group();
+
+scene.add(
+    arrivalPinGroup
+);
+
+
+/* Keep track of pins already reached */
+
+const reachedLocations = [];
+
+
+/* =========================================================
+   CREATE ONE RED PIN
+========================================================= */
+
+function createArrivalPin(place) {
+
+    const group =
+        new THREE.Group();
+
+
+    /*
+       Exact surface position.
+    */
+
+    const position =
+        latLngToVector3(
+            place.lat,
+            place.lng,
+            EARTH_RADIUS + .035
+        );
+
+
+    group.position.copy(
+        position
+    );
+
+
+    /*
+       Main red pinpoint.
+    */
+
+    const pin =
+        new THREE.Mesh(
+
+            new THREE.SphereGeometry(
+                .045,
+                20,
+                20
+            ),
+
+            new THREE.MeshBasicMaterial({
+                color: 0xff2020,
+                depthTest: false,
+                depthWrite: false
+            })
+
+        );
+
+
+    group.add(pin);
+
+
+    /*
+       Small radar ring.
+       This is ONLY the marker —
+       there is NO box.
+    */
+
+    const ring =
+        new THREE.Mesh(
+
+            new THREE.RingGeometry(
+                .055,
+                .075,
+                32
+            ),
+
+            new THREE.MeshBasicMaterial({
+                color: 0xff3030,
+                transparent: true,
+                opacity: .9,
+                side: THREE.DoubleSide,
+                depthTest: false,
+                depthWrite: false
+            })
+
+        );
+
+
+    ring.quaternion.setFromUnitVectors(
+
+        new THREE.Vector3(
+            0,
+            0,
+            1
+        ),
+
+        position.clone().normalize()
+
+    );
+
+
+    group.add(ring);
+
+
+    group.renderOrder =
+        100;
+
+
+    arrivalPinGroup.add(
+        group
+    );
+
+
+    return group;
+}
+
+
+/* =========================================================
+   SHOW PIN WHEN SANTA ARRIVES
+========================================================= */
+
+function showArrivalPin(
+    place
+) {
+
+    /*
+       Don't create the same pin twice.
+    */
+
+    if (
+        reachedLocations.includes(
+            place.name
+        )
+    ) {
+        return;
+    }
+
+
+    reachedLocations.push(
+        place.name
+    );
+
+
+    createArrivalPin(
+        place
+    );
+
+}
+
+
+/* =========================================================
+   NORTH POLE STARTING POINT
+   Santa starts here, but we don't create
+   an arrival pin yet.
+========================================================= */
+
+arrivalPinGroup.visible =
+    true;
+```
